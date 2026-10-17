@@ -1,0 +1,276 @@
+/* Hallmark · genre: editorial · macrostructure: Long Document · theme: Almanac · enrichment: none · nav: N9 · footer: Ft2
+ * tone: utilitarian-literary · anchor hue: 40 (warm rust)
+ * audience: Turkish reader on Android Edge · use: open a PDF, listen with Edge "Sesli oku"
+ */
+@import url("tokens.css");
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body { overflow-x: clip; }
+
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.bar {
+  padding: var(--space-md) var(--space-md) var(--space-lg);
+  border-bottom: var(--rule-hair);
+  font-family: var(--font-ui);
+}
+
+.bar-inner,
+main {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+.wordmark {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: -0.01em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink);
+  font: 600 var(--text-base) / 1 var(--font-ui);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:hover { background: var(--color-paper-2); }
+.button:active { transform: translateY(1px); }
+.button:focus-visible,
+.field:focus-visible,
+summary:focus-visible,
+input[type="checkbox"]:focus-visible,
+.file-input:focus-visible + .button {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.button:disabled,
+.button[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+
+.button.primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+.button.primary:hover { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.inline-form {
+  display: flex;
+  gap: var(--space-xs);
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.field {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap);
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: var(--text-base) var(--font-ui);
+}
+.field[aria-invalid="true"] { border-color: var(--color-error); }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.status {
+  margin: var(--space-sm) 0 0;
+  min-height: 1.5em;
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+}
+.status[data-tone="error"] { color: var(--color-error); font-weight: 600; }
+
+progress {
+  width: 100%;
+  height: 0.25rem;
+  accent-color: var(--color-accent);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+  align-items: center;
+  margin-top: var(--space-md);
+  font-size: var(--text-sm);
+}
+
+.toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--tap);
+}
+
+.toolbar input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-accent);
+}
+
+.toolbar .field { flex: 0 0 5rem; }
+
+.help {
+  margin-top: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+.help summary {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.help ol { margin: 0 0 var(--space-xs); padding-left: var(--space-lg); }
+.help p { margin: var(--space-xs) 0 0; }
+
+main { padding: var(--space-xl) var(--space-md) var(--space-2xl); }
+
+.doc-title {
+  margin: 0 0 var(--space-xl);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.page + .page {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: var(--rule-hair);
+}
+
+.page-mark {
+  margin: 0 0 var(--space-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+.hide-page-numbers .page-mark { display: none; }
+
+/* PDF view: page image with transparent reading-order text on top. */
+.view-pdf .sheet {
+  position: relative;
+  aspect-ratio: var(--aspect, 0.707);
+  background: var(--color-page);
+  border: var(--rule-hair);
+  overflow: hidden;
+}
+.view-pdf .sheet canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.view-pdf .page-text {
+  position: absolute;
+  inset: 0;
+  padding: var(--space-sm);
+  color: transparent;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+}
+.view-pdf .page-text h3 { font-size: var(--text-sm); margin: 0 0 var(--space-xs); }
+.view-pdf .page-text p { margin: 0 0 var(--space-xs); }
+.view-pdf .page-text .note {
+  position: absolute;
+  inset: auto var(--space-sm) var(--space-sm);
+  color: var(--color-ink);
+}
+.view-pdf .page-text ::selection { background: var(--color-select); }
+.view-text .sheet canvas { display: none; }
+
+.page h3 {
+  margin: var(--space-lg) 0 var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.page p { margin: 0 0 var(--space-md); overflow-wrap: break-word; }
+
+.page .note {
+  padding: var(--space-sm) var(--space-md);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-paper-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.colophon {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+  border-top: var(--rule-hair);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+  .button:active { transform: none; }
+}

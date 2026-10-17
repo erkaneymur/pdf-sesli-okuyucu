@@ -1,0 +1,19 @@
+{
+  "name": "android-edge-pdf-reader",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PDF'i cihazda metne çevirip Edge'in Sesli oku özelliğiyle Microsoft sesleriyle okutan web okuyucu",
+  "scripts": {
+    "build": "tsc -p . && node scripts/copy-vendor.mjs",
+    "test": "npm run build && node --test \"tests/**/*.test.mjs\"",
+    "fixtures": "node scripts/make-fixtures.mjs",
+    "serve": "python -m http.server 8080 --bind 0.0.0.0 -d web"
+  },
+  "devDependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38",
+    "typescript": "5.7.3"
+  }
+}

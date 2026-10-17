@@ -1,0 +1,5 @@
+node_modules/
+web/js/
+web/vendor/
+.playwright-mcp/
+tests/fixtures/*.pdf

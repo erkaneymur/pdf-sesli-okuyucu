@@ -2,7 +2,17 @@
 
 Android'deki Edge'in kendi **Sesli oku** özelliği web sayfalarını Microsoft sesleriyle okur, ama PDF'leri okumaz. Bu proje aradaki boşluğu dolduruyor: PDF'i **cihazda** temiz bir metin sayfasına dönüştürüyor, siz de o sayfayı Edge'in Sesli oku özelliğiyle dinliyorsunuz. Google TTS kullanılmıyor, Microsoft'un kapalı API'lerine de dokunulmuyor. Bu kararın gerekçesi [docs/feasibility.md](docs/feasibility.md) dosyasında.
 
-## Kullanım (telefonda)
+**Adres:** https://erkaneymur.github.io/pdf-sesli-okuyucu/
+
+## Telefona / tablete kurma
+
+APK yok, gerek de yok. APK, sayfayı Edge yerine Chrome'da ya da uygulamanın kendi tarayıcısında açardı ve Edge'in Sesli oku özelliği kaybolurdu.
+
+1. Edge'de yukarıdaki adresi açın.
+2. Edge menüsü (≡) → **Telefona ekle** (bazı sürümlerde **Ana ekrana ekle**).
+3. Ana ekrandaki **PDF Oku** simgesine dokunun. Sayfa Edge'de açılır, ilk açılıştan sonra internetsiz de çalışır.
+
+## Kullanım
 
 1. Sayfayı Edge'de açın.
 2. **PDF seç** ile dosyayı seçin ya da bir `https://` PDF bağlantısı yapıştırın.

@@ -1,7 +1,7 @@
 {
-  "name": "PDF Sesli Okuyucu",
-  "short_name": "PDF Oku",
-  "description": "PDF'i cihazda metne çevirir; Edge'in Sesli oku özelliğiyle dinlersiniz.",
+  "name": "Sesli Okuyucu",
+  "short_name": "Okuyucu",
+  "description": "PDF, EPUB, MOBI, DOCX, RTF, TXT ve diğer belgeleri Edge Sesli oku ile dinleyin.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",

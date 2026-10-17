@@ -223,7 +223,7 @@ main { padding: var(--space-xl) var(--space-md) var(--space-2xl); }
   width: 100%;
   height: 100%;
 }
-.view-pdf .page-text {
+.view-pdf .sheet .page-text {
   position: absolute;
   inset: 0;
   padding: var(--space-sm);
@@ -231,14 +231,14 @@ main { padding: var(--space-xl) var(--space-md) var(--space-2xl); }
   font-size: var(--text-sm);
   line-height: 1.3;
 }
-.view-pdf .page-text h3 { font-size: var(--text-sm); margin: 0 0 var(--space-xs); }
-.view-pdf .page-text p { margin: 0 0 var(--space-xs); }
-.view-pdf .page-text .note {
+.view-pdf .sheet .page-text h3 { font-size: var(--text-sm); margin: 0 0 var(--space-xs); }
+.view-pdf .sheet .page-text p { margin: 0 0 var(--space-xs); }
+.view-pdf .sheet .page-text .note {
   position: absolute;
   inset: auto var(--space-sm) var(--space-sm);
   color: var(--color-ink);
 }
-.view-pdf .page-text ::selection { background: var(--color-select); }
+.view-pdf .sheet .page-text ::selection { background: var(--color-select); }
 .view-text .sheet canvas { display: none; }
 
 .page h3 {

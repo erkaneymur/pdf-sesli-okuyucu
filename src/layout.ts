@@ -171,7 +171,11 @@ export function buildBlocks(lines: readonly Line[]): Block[] {
     else last.text = joinLines(last.text, line.text);
     prev = line;
   }
-  return raw.map((b) => ({ ...b, lang: detectLanguage(b.text), sentences: splitSentences(b.text) }));
+  return raw.map((b) => makeBlock(b.kind, b.text));
+}
+
+export function makeBlock(kind: Block["kind"], text: string): Block {
+  return { kind, text, lang: detectLanguage(text), sentences: splitSentences(text) };
 }
 
 const ABBREVIATION =

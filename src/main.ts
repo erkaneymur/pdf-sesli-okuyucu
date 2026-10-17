@@ -6,6 +6,8 @@ import type { Block, Lang } from "./model.js";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { PasswordCancelled, describeError, openPdf, readPageItems, renderPageImage } from "./pdf.js";
 import type { RenderJob } from "./pdf.js";
+import { loadBook, sniffFormat } from "./formats/book.js";
+import { FormatError } from "./formats/errors.js";
 import { loadLastPage, loadPrefs, saveLastPage, savePrefs } from "./storage.js";
 
 const MAX_BYTES = 300 * 1024 * 1024;
@@ -38,8 +40,11 @@ const pageNumbers = $<HTMLInputElement>("page-numbers");
 const help = $<HTMLDetailsElement>("help");
 const article = $<HTMLElement>("doc");
 const viewToggle = $<HTMLButtonElement>("view-toggle");
+const gotoLabel = $<HTMLLabelElement>("goto-label");
 
 let current: AbortController | null = null;
+/** What a section is called: PDF pages, or chapters/chunks of other formats. */
+let unit: "Sayfa" | "Bölüm" = "Sayfa";
 let docId = "";
 let pageObserver: IntersectionObserver | null = null;
 /** Kept open while shown so page images can be drawn lazily. */
@@ -127,22 +132,16 @@ function askPassword(wrong: boolean): Promise<string | null> {
   });
 }
 
-function renderPage(number: number, blocks: readonly Block[], docLang: Lang, aspect: number): HTMLElement {
+/** `aspect` is the page image ratio for PDFs; null for text formats (no image). */
+function renderPage(number: number, blocks: readonly Block[], docLang: Lang, aspect: number | null): HTMLElement {
   const section = document.createElement("section");
   section.className = "page";
   section.id = `sayfa-${number}`;
   section.dataset.page = String(number);
   const mark = document.createElement("h2");
   mark.className = "page-mark";
-  mark.textContent = `Sayfa ${number}`;
-  // PDF view: the page image, with the reading-order text laid over it
-  // transparently so Read aloud still has real text to voice.
-  const sheet = document.createElement("div");
-  sheet.className = "sheet";
-  sheet.style.setProperty("--aspect", String(aspect));
-  const canvas = document.createElement("canvas");
-  canvas.dataset.page = String(number);
-  canvas.setAttribute("aria-hidden", "true");
+  mark.textContent = `${unit} ${number}`;
+  section.append(mark);
   const text = document.createElement("div");
   text.className = "page-text";
   if (blocks.length === 0) {
@@ -157,6 +156,18 @@ function renderPage(number: number, blocks: readonly Block[], docLang: Lang, asp
     if (block.lang !== "und" && block.lang !== docLang) el.lang = block.lang;
     text.append(el);
   }
+  if (aspect === null) {
+    section.append(text);
+    return section;
+  }
+  // PDF view: the page image, with the reading-order text laid over it
+  // transparently so Read aloud still has real text to voice.
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  sheet.style.setProperty("--aspect", String(aspect));
+  const canvas = document.createElement("canvas");
+  canvas.dataset.page = String(number);
+  canvas.setAttribute("aria-hidden", "true");
   sheet.append(canvas, text);
   section.append(sheet);
   sheetObserver.observe(canvas);
@@ -171,13 +182,13 @@ function pageSections(): HTMLElement[] {
 function startFrom(from: number): void {
   const target = document.getElementById(`sayfa-${from}`);
   if (!target) {
-    setStatus(`Sayfa ${from} henüz hazır değil.`, "error");
+    setStatus(`${unit} ${from} yok ya da henüz hazır değil.`, "error");
     return;
   }
   for (const s of pageSections()) s.hidden = Number(s.dataset.page) < from;
   showAllButton.hidden = from <= 1;
   target.scrollIntoView({ block: "start" });
-  setStatus(`Sayfa ${from} ve sonrası gösteriliyor. Sesli oku bu sayfadan başlar.`);
+  setStatus(`${unit} ${from} ve sonrası gösteriliyor. Sesli oku buradan başlar.`);
 }
 
 function trackReadingPosition(): void {
@@ -195,12 +206,11 @@ function trackReadingPosition(): void {
   );
 }
 
-async function loadDocument(data: Uint8Array, name: string): Promise<void> {
+/** Cancels any running load and clears the view; returns the new load's controller. */
+function resetView(nextUnit: "Sayfa" | "Bölüm"): AbortController {
   current?.abort();
   const controller = new AbortController();
   current = controller;
-  const { signal } = controller;
-
   for (const canvas of [...renderJobs.keys()]) freeCanvas(canvas);
   sheetObserver.disconnect();
   void activeDoc?.destroy();
@@ -209,6 +219,73 @@ async function loadDocument(data: Uint8Array, name: string): Promise<void> {
   toolbar.hidden = true;
   resumeButton.hidden = true;
   showAllButton.hidden = true;
+  unit = nextUnit;
+  gotoLabel.textContent = nextUnit === "Sayfa" ? "Şu sayfadan başla" : "Şu bölümden başla";
+  viewToggle.hidden = nextUnit !== "Sayfa";
+  return controller;
+}
+
+function showTitle(title: string): void {
+  const heading = document.createElement("h1");
+  heading.className = "doc-title";
+  heading.textContent = title;
+  article.append(heading);
+  document.title = `${title} · Sesli Okuyucu`;
+}
+
+/** Cheap content fingerprint for remembering the reading position (crypto.subtle needs HTTPS). */
+function fingerprint(data: Uint8Array): string {
+  let h = 0x811c9dc5;
+  const step = Math.max(1, Math.floor(data.length / 65_536));
+  for (let i = 0; i < data.length; i += step) h = Math.imul(h ^ (data[i] ?? 0), 0x01000193);
+  return `${data.length.toString(36)}-${(h >>> 0).toString(36)}`;
+}
+
+async function loadBookFile(data: Uint8Array, name: string): Promise<void> {
+  const { signal } = resetView("Bölüm");
+  setStatus("Dosya açılıyor…");
+  let book;
+  try {
+    book = await loadBook(data, name);
+  } catch (error) {
+    if (!signal.aborted) {
+      setStatus(error instanceof FormatError ? error.message : `Dosya açılamadı: ${error instanceof Error ? error.message : String(error)}`, "error");
+    }
+    return;
+  }
+  if (signal.aborted) return;
+  const total = book.sections.length;
+  if (total === 0) {
+    setStatus(`${book.format} dosyasında okunabilir metin bulunamadı.`, "error");
+    return;
+  }
+  docId = `b-${fingerprint(data)}`;
+  article.lang = book.lang;
+  showTitle(book.title);
+  gotoInput.max = String(total);
+  toolbar.hidden = false;
+  help.open = false;
+  trackReadingPosition();
+  book.sections.forEach((blocks, k) => {
+    const section = renderPage(k + 1, blocks, book.lang, null);
+    article.append(section);
+    pageObserver?.observe(section);
+  });
+  const lastPage = loadLastPage(docId);
+  if (lastPage && lastPage > 1 && lastPage <= total) {
+    resumeButton.textContent = `Devam et: bölüm ${lastPage}`;
+    resumeButton.hidden = false;
+  }
+  setStatus(`Hazır: ${book.format}, ${total} bölüm. Edge menüsü → Sesli oku.`);
+}
+
+function openAny(data: Uint8Array, name: string): Promise<void> {
+  return sniffFormat(data, name) === "pdf" ? loadDocument(data, name) : loadBookFile(data, name);
+}
+
+async function loadDocument(data: Uint8Array, name: string): Promise<void> {
+  const controller = resetView("Sayfa");
+  const { signal } = controller;
   setStatus("PDF açılıyor…");
 
   let doc;
@@ -227,12 +304,7 @@ async function loadDocument(data: Uint8Array, name: string): Promise<void> {
   docId = doc.fingerprints[0] ?? name;
   const meta = await doc.getMetadata().catch(() => null);
   const info = meta?.info as { Title?: unknown } | undefined;
-  const title = typeof info?.Title === "string" && info.Title.trim() ? info.Title.trim() : name.replace(/\.pdf$/i, "");
-  const heading = document.createElement("h1");
-  heading.className = "doc-title";
-  heading.textContent = title;
-  article.append(heading);
-  document.title = `${title} · PDF Sesli Okuyucu`;
+  showTitle(typeof info?.Title === "string" && info.Title.trim() ? info.Title.trim() : name.replace(/\.pdf$/i, ""));
 
   const total = doc.numPages;
   progress.max = total;
@@ -298,7 +370,7 @@ fileInput.addEventListener("change", () => {
     return;
   }
   void file.arrayBuffer().then(
-    (buf) => loadDocument(new Uint8Array(buf), file.name),
+    (buf) => openAny(new Uint8Array(buf), file.name),
     () => setStatus("Dosya okunamadı. Erişim izni verildiğinden emin olun.", "error"),
   );
 });
@@ -317,19 +389,19 @@ urlForm.addEventListener("submit", (e) => {
     setStatus("Yalnızca https:// bağlantıları açılabilir.", "error");
     return;
   }
-  setStatus("PDF indiriliyor…");
+  setStatus("Dosya indiriliyor…");
   void fetch(url, { credentials: "omit" })
     .then(async (res) => {
       if (!res.ok) throw new Error(`Sunucu ${res.status} döndürdü.`);
       const length = Number(res.headers.get("content-length") ?? 0);
       if (length > MAX_BYTES) throw new Error("Dosya çok büyük (300 MB üstü).");
-      const name = decodeURIComponent(url.pathname.split("/").pop() || "belge.pdf");
-      await loadDocument(new Uint8Array(await res.arrayBuffer()), name);
+      const name = decodeURIComponent(url.pathname.split("/").pop() || "belge");
+      await openAny(new Uint8Array(await res.arrayBuffer()), name);
     })
     .catch((error: unknown) => {
       const message =
         error instanceof TypeError
-          ? "Bağlantı açılamadı. Sunucu, PDF'in başka sitelerden okunmasına izin vermiyor olabilir (CORS). PDF'i indirip “PDF seç” ile açın."
+          ? "Bağlantı açılamadı. Sunucu, dosyanın başka sitelerden okunmasına izin vermiyor olabilir (CORS). Dosyayı indirip “Dosya seç” ile açın."
           : error instanceof Error
             ? error.message
             : String(error);

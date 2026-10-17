@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PDF Sesli Okuyucu</title>
-  <meta name="description" content="PDF'i cihazınızda metne çevirir; Edge'in Sesli oku özelliğiyle dinlersiniz.">
+  <title>Sesli Okuyucu</title>
+  <meta name="description" content="PDF, EPUB, MOBI, DOCX, RTF, TXT ve diğer belgeleri cihazınızda açar; Edge'in Sesli oku özelliğiyle dinlersiniz.">
   <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#221d18" media="(prefers-color-scheme: dark)">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zT2sURFtSu8vHCmB3TsjuqYPvUskPjDNGrYyx8ztB1w='; worker-src 'self' blob:; connect-src 'self' https:; img-src 'self' data:; style-src 'self'; object-src 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zT2sURFtSu8vHCmB3TsjuqYPvUskPjDNGrYyx8ztB1w='; worker-src 'self' blob:; connect-src 'self' https: blob:; img-src 'self' data: blob:; style-src 'self'; object-src 'none'; base-uri 'none'">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -18,14 +18,15 @@
 <body>
   <header class="bar" id="controls">
     <div class="bar-inner">
-      <p class="wordmark">PDF Sesli Okuyucu</p>
+      <p class="wordmark">Sesli Okuyucu</p>
 
       <div class="actions">
-        <input class="file-input" type="file" id="file" accept="application/pdf,.pdf">
-        <label class="button primary" for="file">PDF seç</label>
+        <!-- No accept filter: Android pickers hide files whose MIME type they don't know (e.g. .mobi). -->
+        <input class="file-input" type="file" id="file">
+        <label class="button primary" for="file">Dosya seç</label>
         <form class="inline-form" id="url-form">
-          <label class="visually-hidden" for="url">PDF bağlantısı</label>
-          <input class="field" id="url" type="url" inputmode="url" placeholder="veya PDF bağlantısı yapıştırın" autocomplete="off">
+          <label class="visually-hidden" for="url">Belge bağlantısı</label>
+          <input class="field" id="url" type="url" inputmode="url" placeholder="veya bağlantı yapıştırın" autocomplete="off">
           <button class="button" type="submit">Aç</button>
         </form>
       </div>
@@ -43,23 +44,23 @@
       <div class="toolbar" id="toolbar" hidden>
         <button class="button" type="button" id="view-toggle"></button>
         <button class="button" type="button" id="resume" hidden></button>
-        <button class="button" type="button" id="show-all" hidden>Tüm sayfaları göster</button>
+        <button class="button" type="button" id="show-all" hidden>Tümünü göster</button>
         <form class="inline-form" id="goto-form">
-          <label for="goto">Şu sayfadan başla</label>
+          <label for="goto" id="goto-label">Şu sayfadan başla</label>
           <input class="field" id="goto" type="number" inputmode="numeric" min="1">
           <button class="button" type="submit">Başla</button>
         </form>
-        <label><input type="checkbox" id="page-numbers"> Sayfa numaralarını okut</label>
+        <label><input type="checkbox" id="page-numbers"> Sayfa / bölüm numaralarını okut</label>
       </div>
 
       <details class="help" id="help" open>
         <summary>Nasıl dinlerim?</summary>
         <ol>
-          <li>PDF'i seçin. Metin aşağıda belirir.</li>
-          <li>Edge menüsünü (⋯) açın ve <strong>Sesli oku</strong>'ya dokunun.</li>
+          <li>Dosyanızı seçin: PDF, EPUB, MOBI/AZW3, DOCX, ODT, RTF, TXT, Markdown, HTML veya FB2.</li>
+          <li>Edge menüsünü (≡) açın ve <strong>Sesli oku</strong>'ya dokunun.</li>
           <li>Ses ve hızı Edge'in Sesli oku panelinden seçin.</li>
         </ol>
-        <p>PDF bu cihazda metne çevrilir, hiçbir sunucuya yüklenmez. Seslendirmeyi Edge'in Sesli oku özelliği Microsoft sesleriyle yapar.</p>
+        <p>Dosya bu cihazda açılır, hiçbir sunucuya yüklenmez. Seslendirmeyi Edge'in Sesli oku özelliği Microsoft sesleriyle yapar.</p>
       </details>
     </div>
   </header>
@@ -68,6 +69,6 @@
     <article id="doc" lang="tr"></article>
   </main>
 
-  <footer class="colophon">Metin cihazda çıkarılır · Seslendirme Edge Sesli oku ile yapılır</footer>
+  <footer class="colophon">Belge cihazda açılır · Seslendirme Edge Sesli oku ile yapılır</footer>
 </body>
 </html>
